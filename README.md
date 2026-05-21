@@ -1,4 +1,4 @@
-# Agent Mira - Real Estate Intelligence Workspace
+# Agent Mira Case 3 - Real Estate Intelligence Workspace
 
 A full-stack Next.js application for property discovery using both structured filters and natural-language search, with per-user saved listings and side-by-side comparison.
 
