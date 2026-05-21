@@ -1,0 +1,50 @@
+[
+  {
+    "id": 1,
+    "title": "3 BHK Apartment in Downtown",
+    "price": 450000,
+    "location": "New York, NY",
+    "bedrooms": 3,
+    "bathrooms": 2,
+    "sizeSqft": 1500,
+    "amenities": [
+      "Gym",
+      "Swimming Pool",
+      "Parking"
+    ],
+    "imageUrl": "https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg",
+    "createdAt": "2026-05-21T10:49:18.422Z"
+  },
+  {
+    "id": 6,
+    "title": "Cozy Studio in Central Park",
+    "price": 300000,
+    "location": "New York, NY",
+    "bedrooms": 1,
+    "bathrooms": 1,
+    "sizeSqft": 600,
+    "amenities": [
+      "Park View",
+      "24/7 Concierge",
+      "Fitness Center"
+    ],
+    "imageUrl": "https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg",
+    "createdAt": "2026-05-21T10:29:56.617Z"
+  },
+  {
+    "id": 4,
+    "title": "1 BHK Budget Apartment",
+    "price": 250000,
+    "location": "Austin, TX",
+    "bedrooms": 1,
+    "bathrooms": 1,
+    "sizeSqft": 800,
+    "amenities": [
+      "Gym",
+      "Laundry",
+      "Security"
+    ],
+    "imageUrl": "https://images.pexels.com/photos/271624/pexels-photo-271624.jpeg",
+    "createdAt": "2026-05-21T10:33:05.776Z"
+  }
+]

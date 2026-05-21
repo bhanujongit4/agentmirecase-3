@@ -1,0 +1,185 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f3f5f7;
+  --foreground: #18212b;
+  --surface: #ffffff;
+  --surface-border: #d8dde4;
+  --primary: #0f766e;
+  --primary-hover: #0a5f59;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: linear-gradient(180deg, #eaf2ef 0%, var(--background) 40%);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), sans-serif;
+}
+
+.page {
+  min-height: 100vh;
+  padding: 24px;
+}
+
+.chatCard {
+  max-width: 1100px;
+  margin: 0 auto;
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  border-radius: 16px;
+  padding: 24px;
+}
+
+.subtitle {
+  margin-top: 0;
+  color: #3b4958;
+}
+
+.searchForm {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  align-items: end;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+input {
+  border: 1px solid #bcc6d1;
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 14px;
+}
+
+button {
+  border: none;
+  border-radius: 8px;
+  background: var(--primary);
+  color: white;
+  padding: 10px 14px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+button:hover {
+  background: var(--primary-hover);
+}
+
+button:disabled {
+  background: #7ea7a4;
+  cursor: not-allowed;
+}
+
+.botMessage {
+  margin-top: 16px;
+  padding: 12px;
+  border-left: 4px solid var(--primary);
+  background: #eef9f8;
+  border-radius: 6px;
+}
+
+.resultsHeader {
+  margin-top: 20px;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+}
+
+.emptyState {
+  color: #5a6777;
+}
+
+.propertyGrid {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 14px;
+}
+
+.propertyCard {
+  border: 1px solid #d4dce5;
+  border-radius: 12px;
+  padding: 12px;
+  background: #ffffff;
+}
+
+.propertyCard img {
+  width: 100%;
+  height: 170px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.propertyCard h3 {
+  margin-bottom: 8px;
+}
+
+.propertyCard p {
+  margin: 6px 0;
+}
+
+.amenities {
+  color: #334155;
+  font-size: 14px;
+}
+
+.savedSection {
+  margin-top: 20px;
+  border-top: 1px solid #d4dce5;
+  padding-top: 16px;
+}
+
+.statusLine {
+  color: #415063;
+}
+
+.savedSection ul {
+  padding-left: 16px;
+}
+
+
+.userRow {
+  margin-bottom: 12px;
+}
+
+.userField {
+  max-width: 420px;
+}
+
+.savedItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+
+.authBox {
+  border: 1px solid #d4dce5;
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 14px;
+  background: #f8fafc;
+}
+
+.authFields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 8px;
+}
+
+.authActions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
