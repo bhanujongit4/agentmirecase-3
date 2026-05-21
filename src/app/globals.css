@@ -183,3 +183,10 @@ button:disabled {
   gap: 8px;
   margin-top: 10px;
 }
+
+
+.chatSearchForm {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+}

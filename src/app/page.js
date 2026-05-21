@@ -29,10 +29,11 @@ export default function Home() {
   const [currentUserEmail, setCurrentUserEmail] = useState("");
   const [authStatus, setAuthStatus] = useState("Not logged in.");
   const [form, setForm] = useState(initialForm);
+  const [nlQuery, setNlQuery] = useState("");
   const [loading, setLoading] = useState(false);
-  const [chatMessage, setChatMessage] = useState(
-    "Tell me your preferences and I will find matching homes.",
-  );
+  const [chatMessage, setChatMessage] = useState("Tell me your preferences and I will find matching homes.");
+  const [correctedText, setCorrectedText] = useState("");
+  const [parsedFilters, setParsedFilters] = useState(null);
   const [results, setResults] = useState([]);
   const [savedProperties, setSavedProperties] = useState([]);
   const [saveStatus, setSaveStatus] = useState("");
@@ -47,12 +48,7 @@ export default function Home() {
       { key: "minBedrooms", label: "Min Bedrooms", type: "number", placeholder: "e.g. 2" },
       { key: "minBathrooms", label: "Min Bathrooms", type: "number", placeholder: "e.g. 2" },
       { key: "minSizeSqft", label: "Min Size (sqft)", type: "number", placeholder: "e.g. 1200" },
-      {
-        key: "amenities",
-        label: "Amenities (comma separated)",
-        type: "text",
-        placeholder: "e.g. Gym, Parking",
-      },
+      { key: "amenities", label: "Amenities (comma separated)", type: "text", placeholder: "e.g. Gym, Parking" },
     ],
     [],
   );
@@ -70,9 +66,7 @@ export default function Home() {
         body: JSON.stringify({ email: normalizedEmail(), password: authForm.password }),
       });
       const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.details ? `${data.error} ${data.details}` : data.error || "Registration failed");
-      }
+      if (!response.ok) throw new Error(data.details ? `${data.error} ${data.details}` : data.error || "Registration failed");
       setCurrentUserEmail(data.email);
       setAuthStatus(`Logged in as ${data.email}`);
       setAuthForm((prev) => ({ ...prev, password: "" }));
@@ -90,9 +84,7 @@ export default function Home() {
         body: JSON.stringify({ email: normalizedEmail(), password: authForm.password }),
       });
       const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.details ? `${data.error} ${data.details}` : data.error || "Login failed");
-      }
+      if (!response.ok) throw new Error(data.details ? `${data.error} ${data.details}` : data.error || "Login failed");
       setCurrentUserEmail(data.email);
       setAuthStatus(`Logged in as ${data.email}`);
       setAuthForm((prev) => ({ ...prev, password: "" }));
@@ -108,8 +100,7 @@ export default function Home() {
     window.location.reload();
   }
 
-  async function handleSearch(event) {
-    event.preventDefault();
+  async function runSearch(payload) {
     setLoading(true);
     setSaveStatus("");
 
@@ -117,23 +108,39 @@ export default function Home() {
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify(payload),
       });
 
       const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Search failed");
-      }
+      if (!response.ok) throw new Error(data.error || "Search failed");
 
       setChatMessage(data.message);
-      setResults(data.results);
+      setCorrectedText(data.correctedText || "");
+      setParsedFilters(data.filters || null);
+      setResults(data.results || []);
     } catch (error) {
       setChatMessage(error.message || "Something went wrong while searching.");
+      setCorrectedText("");
+      setParsedFilters(null);
       setResults([]);
     } finally {
       setLoading(false);
     }
+  }
+
+  async function handleSearch(event) {
+    event.preventDefault();
+    await runSearch(form);
+  }
+
+  async function handleChatSearch(event) {
+    event.preventDefault();
+    if (!nlQuery.trim()) {
+      setChatMessage("Type your request first.");
+      return;
+    }
+
+    await runSearch({ message: nlQuery });
   }
 
   async function fetchSavedProperties() {
@@ -145,17 +152,11 @@ export default function Home() {
     setSaveStatus("Loading saved properties...");
 
     try {
-      const response = await fetch(`/api/saved?email=${encodeURIComponent(currentUserEmail)}`, {
-        method: "GET",
-      });
+      const response = await fetch(`/api/saved?email=${encodeURIComponent(currentUserEmail)}`, { method: "GET" });
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(
-          data.details
-            ? `${data.error} ${data.details}`
-            : data.error || "Unable to fetch saved properties.",
-        );
+        throw new Error(data.details ? `${data.error} ${data.details}` : data.error || "Unable to fetch saved properties.");
       }
 
       setSavedProperties(data.saved || []);
@@ -181,13 +182,8 @@ export default function Home() {
       });
 
       const data = await response.json();
-
       if (!response.ok) {
-        throw new Error(
-          data.details
-            ? `${data.error} ${data.details}`
-            : data.error || "Unable to save property.",
-        );
+        throw new Error(data.details ? `${data.error} ${data.details}` : data.error || "Unable to save property.");
       }
 
       setSaveStatus(data.message || `Property saved to ${data.storage || "storage"}.`);
@@ -213,13 +209,8 @@ export default function Home() {
       });
 
       const data = await response.json();
-
       if (!response.ok) {
-        throw new Error(
-          data.details
-            ? `${data.error} ${data.details}`
-            : data.error || "Unable to delete property.",
-        );
+        throw new Error(data.details ? `${data.error} ${data.details}` : data.error || "Unable to delete property.");
       }
 
       setSaveStatus(data.message || `Property deleted from ${data.storage || "storage"}.`);
@@ -238,20 +229,8 @@ export default function Home() {
         <div className="authBox">
           <h2>Login</h2>
           <div className="authFields">
-            <input
-              type="email"
-              value={authForm.email}
-              placeholder="Email"
-              onChange={(event) => setAuthForm((prev) => ({ ...prev, email: event.target.value }))}
-            />
-            <input
-              type="password"
-              value={authForm.password}
-              placeholder="Password"
-              onChange={(event) =>
-                setAuthForm((prev) => ({ ...prev, password: event.target.value }))
-              }
-            />
+            <input type="email" value={authForm.email} placeholder="Email" onChange={(event) => setAuthForm((prev) => ({ ...prev, email: event.target.value }))} />
+            <input type="password" value={authForm.password} placeholder="Password" onChange={(event) => setAuthForm((prev) => ({ ...prev, password: event.target.value }))} />
           </div>
           <div className="authActions">
             <button type="button" onClick={register}>Register</button>
@@ -261,33 +240,36 @@ export default function Home() {
           <p className="statusLine">{authStatus}</p>
         </div>
 
+        <div className="authBox">
+          <h2>Chat Search (LLM)</h2>
+          <form onSubmit={handleChatSearch} className="chatSearchForm">
+            <input
+              type="text"
+              value={nlQuery}
+              placeholder='e.g. Looking for a property in new yrk with at least 2 bedrooms under 500000'
+              onChange={(event) => setNlQuery(event.target.value)}
+            />
+            <button type="submit" disabled={loading}>{loading ? "Thinking..." : "Ask Chatbot"}</button>
+          </form>
+        </div>
+
         <form onSubmit={handleSearch} className="searchForm">
           {formEntries.map((entry) => (
             <label key={entry.key} className="field">
               <span>{entry.label}</span>
-              <input
-                type={entry.type}
-                value={form[entry.key]}
-                placeholder={entry.placeholder}
-                onChange={(event) =>
-                  setForm((prev) => ({ ...prev, [entry.key]: event.target.value }))
-                }
-              />
+              <input type={entry.type} value={form[entry.key]} placeholder={entry.placeholder} onChange={(event) => setForm((prev) => ({ ...prev, [entry.key]: event.target.value }))} />
             </label>
           ))}
-
-          <button type="submit" disabled={loading}>
-            {loading ? "Searching..." : "Find Homes"}
-          </button>
+          <button type="submit" disabled={loading}>{loading ? "Searching..." : "Find Homes"}</button>
         </form>
 
         <div className="botMessage">{chatMessage}</div>
+        {correctedText ? <p className="statusLine"><strong>Corrected query:</strong> {correctedText}</p> : null}
+        {parsedFilters ? <p className="statusLine"><strong>Parsed filters:</strong> {JSON.stringify(parsedFilters)}</p> : null}
 
         <div className="resultsHeader">
           <h2>Matching Properties</h2>
-          <button type="button" onClick={fetchSavedProperties}>
-            View Saved Properties
-          </button>
+          <button type="button" onClick={fetchSavedProperties}>View Saved Properties</button>
         </div>
 
         {!hasResults && <p className="emptyState">No properties to show yet.</p>}
@@ -299,13 +281,9 @@ export default function Home() {
               <h3>{property.title}</h3>
               <p>{property.location}</p>
               <p>{formatCurrency(property.price)}</p>
-              <p>
-                {property.bedrooms} bed | {property.bathrooms} bath | {property.sizeSqft} sqft
-              </p>
+              <p>{property.bedrooms} bed | {property.bathrooms} bath | {property.sizeSqft} sqft</p>
               <p className="amenities">Amenities: {property.amenities.join(", ")}</p>
-              <button type="button" onClick={() => saveProperty(property)}>
-                Save Property
-              </button>
+              <button type="button" onClick={() => saveProperty(property)}>Save Property</button>
             </article>
           ))}
         </div>
@@ -316,12 +294,8 @@ export default function Home() {
           <ul>
             {savedProperties.map((property) => (
               <li key={property._id || `${property.userEmail}-${property.id}`} className="savedItem">
-                <span>
-                  {property.title} ({property.location}) - {formatCurrency(property.price)}
-                </span>
-                <button type="button" onClick={() => deleteSavedProperty(property.id)}>
-                  Delete
-                </button>
+                <span>{property.title} ({property.location}) - {formatCurrency(property.price)}</span>
+                <button type="button" onClick={() => deleteSavedProperty(property.id)}>Delete</button>
               </li>
             ))}
           </ul>
