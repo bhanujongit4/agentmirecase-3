@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getMongoClientPromise } from "@/lib/mongodb";
 import { normalizeEmail, verifyPassword } from "@/lib/auth/password";
 
-const DB_NAME = process.env.MONGODB_DB_NAME || "agent_mira";
+const DB_NAME = process.env.MONGODB_DB_NAME || "agentmira";
 const USERS_COLLECTION = "users";
 
 export async function POST(request) {

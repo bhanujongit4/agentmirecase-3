@@ -228,7 +228,10 @@ async function extractFiltersFromMessage(message, properties) {
     { role: "user", content: prompt },
   ]);
 
+
+
   const cleaned = raw.replace(/```json|```/g, "").trim();
+  
   return JSON.parse(cleaned);
 }
 
@@ -248,6 +251,7 @@ export async function POST(request) {
 
     let filters;
     let correctedText = "";
+    
 
     if (body.message && String(body.message).trim()) {
       const messageText = String(body.message).trim();
@@ -256,12 +260,14 @@ export async function POST(request) {
       try {
         const extracted = await extractFiltersFromMessage(messageText, properties);
         const llmFilters = normalizeFilters(extracted);
+        console.log(llmFilters);
         correctedText = extracted.correctedText || "";
 
         filters = hasAnyFilter(llmFilters) ? llmFilters : deterministic;
-      } catch {
-        filters = deterministic;
-      }
+      } catch (err) {
+  console.error("LLM extraction failed:", err);
+  filters = deterministic;
+}
 
       if (!hasAnyFilter(filters)) {
         const broadMatches = properties.slice(0, 5);
